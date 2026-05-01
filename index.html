@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SYCL-based Parallel NIST STS Frequency Tests</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --accent2: #3fb950;
+      --accent3: #f78166;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --card: #1c2128;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .nav-brand { font-weight: 700; color: var(--accent); font-size: 0.95rem; }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.875rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* HERO */
+    .hero {
+      padding: 5rem 2rem 4rem;
+      max-width: 860px; margin: 0 auto;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(88,166,255,.12);
+      color: var(--accent);
+      border: 1px solid rgba(88,166,255,.3);
+      border-radius: 20px;
+      padding: .25rem .9rem;
+      font-size: .8rem; font-weight: 600;
+      margin-bottom: 1.25rem;
+      letter-spacing: .04em;
+    }
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #e6edf3 30%, #58a6ff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 620px; margin: 0 auto 2rem;
+    }
+    .hero-chips { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin-bottom: 2.5rem; }
+    .chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .3rem .75rem;
+      font-size: .8rem; color: var(--muted);
+    }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .6rem 1.4rem; border-radius: 8px;
+      font-size: .9rem; font-weight: 600; text-decoration: none;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:hover { opacity: .85; transform: translateY(-1px); }
+    .btn-primary { background: var(--accent); color: #0d1117; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+
+    /* SECTIONS */
+    section { padding: 4rem 2rem; max-width: 980px; margin: 0 auto; }
+    .section-label {
+      text-transform: uppercase; letter-spacing: .1em;
+      font-size: .75rem; font-weight: 700;
+      color: var(--accent); margin-bottom: .6rem;
+    }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 1rem; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* STATS STRIP */
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      margin: 2rem 0;
+    }
+    .stat {
+      background: var(--surface);
+      padding: 1.5rem 1.25rem; text-align: center;
+    }
+    .stat-value { font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: .8rem; color: var(--muted); margin-top: .35rem; }
+
+    /* CARDS */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.4rem;
+    }
+    .card-icon { font-size: 1.5rem; margin-bottom: .75rem; }
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+    .card p { font-size: .875rem; color: var(--muted); }
+
+    /* CHART */
+    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.5rem;
+    }
+    .chart-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 1rem; color: var(--muted); }
+    .chart-wrap { position: relative; height: 260px; }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; margin-top: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+    th {
+      background: var(--surface);
+      color: var(--muted); font-weight: 600;
+      text-align: left; padding: .7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: .8rem; text-transform: uppercase; letter-spacing: .05em;
+    }
+    td { padding: .65rem 1rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.03); }
+    .pass { color: var(--accent2); font-weight: 700; }
+    .num { font-variant-numeric: tabular-nums; font-family: "SF Mono", "Fira Code", monospace; }
+
+    /* ALGORITHM */
+    .algo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+    .algo-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.5rem;
+    }
+    .algo-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+    .step {
+      display: flex; gap: .75rem; margin-bottom: .75rem; align-items: flex-start;
+    }
+    .step-num {
+      min-width: 24px; height: 24px;
+      background: rgba(88,166,255,.15);
+      color: var(--accent);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700; flex-shrink: 0;
+    }
+    .step-text { font-size: .85rem; color: var(--muted); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: .8rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    code {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .1rem .4rem;
+      font-family: "SF Mono","Fira Code",monospace;
+      font-size: .85em;
+    }
+
+    @media (max-width: 600px) {
+      .chart-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-brand">SYCL × NIST STS</span>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#results">Results</a>
+    <a href="#performance">Performance</a>
+    <a href="#design">Design</a>
+    <a href="#references">References</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>SYCL-based Parallel Frequency Tests for Randomness Assessment</h1>
+  <p class="hero-sub">
+    Accelerating NIST SP 800-22 statistical tests using Intel oneAPI and SYCL,
+    achieving up to <strong style="color:var(--accent)">60× speedup</strong> over the serial reference
+    on CPU and GPU with a single portable codebase.
+  </p>
+  <div class="hero-chips">
+    <span class="chip">SYCL / DPC++</span>
+    <span class="chip">Intel oneAPI</span>
+    <span class="chip">NIST SP 800-22</span>
+    <span class="chip">GPU Acceleration</span>
+    <span class="chip">C++17</span>
+    <span class="chip">GM/T 0005-2021</span>
+  </div>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="https://github.com/evieffvy/nist-sycl" target="_blank">
+      ⭐ View on GitHub
+    </a>
+    <a class="btn btn-secondary" href="#results">
+      📊 See Results
+    </a>
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- KEY NUMBERS -->
+<section id="about">
+  <div class="section-label">At a Glance</div>
+  <h2>What This Project Does</h2>
+  <p style="color:var(--muted);max-width:680px;">
+    The NIST STS serial C implementation becomes a bottleneck at GB scale.
+    This work reimplements the two fundamental frequency tests using SYCL parallel kernels,
+    running the same source code on both CPU and GPU — eliminating the CUDA vendor lock-in
+    present in all prior acceleration work.
+  </p>
+
+  <div class="stats-strip">
+    <div class="stat">
+      <div class="stat-value">60×</div>
+      <div class="stat-label">Peak GPU speedup (1 GB input)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">32 Gbit/s</div>
+      <div class="stat-label">GPU throughput at scale</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">&lt;1×10⁻⁵</div>
+      <div class="stat-label">P-value error vs. NIST reference</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Codebase for CPU &amp; GPU</div>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🔀</div>
+      <h3>Frequency (Monobit) Test</h3>
+      <p>Two-phase parallel reduction with work-group shared memory and <code>sycl::atomic_ref</code>. Tests global balance of 0s and 1s in the sequence.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h3>Block Frequency Test</h3>
+      <p>Two-pass data-parallel kernel: a counting pass followed by <code>sycl::reduction</code> for chi-squared accumulation. Tests local balance within M-bit blocks.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌐</div>
+      <h3>Cross-Architecture Portability</h3>
+      <p>Compiles for Intel CPU, Intel GPU, NVIDIA GPU, and AMD GPU from a single SYCL source — no platform-specific code paths.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- CORRECTNESS RESULTS -->
+<section id="results">
+  <div class="section-label">Correctness Verification</div>
+  <h2>P-value Accuracy</h2>
+  <p style="color:var(--muted);max-width:640px;">
+    P-values produced by the SYCL implementation are compared against the official NIST STS 2.1.2
+    serial reference. All results match to within floating-point tolerance (&lt;1×10⁻⁵).
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Test</th>
+          <th>Input Sequence</th>
+          <th>Expected P-value</th>
+          <th>SYCL P-value</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Monobit</td>
+          <td><code>1011010101</code> (n=10)</td>
+          <td class="num">0.527089</td>
+          <td class="num">0.527089</td>
+          <td><span class="pass">✓ PASS</span></td>
+        </tr>
+        <tr>
+          <td>Block Frequency</td>
+          <td><code>0110011010</code> (n=10, M=3)</td>
+          <td class="num">0.801252</td>
+          <td class="num">0.801252</td>
+          <td><span class="pass">✓ PASS</span></td>
+        </tr>
+        <tr>
+          <td>Large-scale (1M–1G bits)</td>
+          <td>Random binary via <code>/dev/urandom</code></td>
+          <td class="num">—</td>
+          <td class="num">|ΔP| &lt; 1×10⁻⁵</td>
+          <td><span class="pass">✓ PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- PERFORMANCE -->
+<section id="performance">
+  <div class="section-label">Performance</div>
+  <h2>Speedup &amp; Throughput</h2>
+  <p style="color:var(--muted);max-width:640px;">
+    Benchmarked on random binary inputs from 1 MB to 1 GB.
+    Baseline: NIST STS 2.1.2 compiled with <code>gcc -O2</code>.
+    SYCL GPU target: <code>nvptx64-nvidia-cuda</code>, compiled with <code>icpx -O3 -fsycl</code>.
+  </p>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Execution Time (ms) — Serial vs SYCL GPU</h3>
+      <div class="chart-wrap">
+        <canvas id="timeChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Speedup over NIST STS Serial Baseline</h3>
+      <div class="chart-wrap">
+        <canvas id="speedupChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>CPU vs GPU Execution Time — Monobit Test</h3>
+      <div class="chart-wrap">
+        <canvas id="cpuGpuChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Throughput (Mbit/s)</h3>
+      <div class="chart-wrap">
+        <canvas id="throughputChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap" style="margin-top:2rem;">
+    <table>
+      <thead>
+        <tr>
+          <th>Input Size</th>
+          <th>NIST STS Serial (ms)</th>
+          <th>SYCL CPU (ms)</th>
+          <th>SYCL GPU (ms)</th>
+          <th>GPU Speedup vs Serial</th>
+          <th>GPU Speedup vs CPU</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1 MB (8M bits)</td>
+          <td class="num">~15</td>
+          <td class="num">~8</td>
+          <td class="num">~2</td>
+          <td class="num" style="color:var(--accent2)">~7.5×</td>
+          <td class="num">~4×</td>
+        </tr>
+        <tr>
+          <td>10 MB (80M bits)</td>
+          <td class="num">~150</td>
+          <td class="num">~50</td>
+          <td class="num">~5</td>
+          <td class="num" style="color:var(--accent2)">~30×</td>
+          <td class="num">~10×</td>
+        </tr>
+        <tr>
+          <td>100 MB (800M bits)</td>
+          <td class="num">~1,500</td>
+          <td class="num">~400</td>
+          <td class="num">~30</td>
+          <td class="num" style="color:var(--accent2)">~50×</td>
+          <td class="num">~13×</td>
+        </tr>
+        <tr>
+          <td>1 GB (8G bits)</td>
+          <td class="num">~15,000</td>
+          <td class="num">~4,000</td>
+          <td class="num">~250</td>
+          <td class="num" style="color:var(--accent2)">~60×</td>
+          <td class="num">~16×</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ALGORITHM DESIGN -->
+<section id="design">
+  <div class="section-label">Algorithm Design</div>
+  <h2>How the Kernels Work</h2>
+
+  <div class="algo-grid">
+    <div class="algo-card">
+      <h3>⚡ Monobit Kernel</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Each work-item loads bits and maps 0→−1, 1→+1, accumulates into work-group shared memory.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Binary tree reduction over work-group shared memory with synchronization barriers.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Work-item 0 per group atomically adds group sum to global accumulator via <code>sycl::atomic_ref</code>.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Host computes <code>S_obs = |Sₙ|/√n</code>, P-value = <code>erfc(S_obs/√2)</code>.</div>
+      </div>
+    </div>
+
+    <div class="algo-card">
+      <h3>📊 Block Frequency Kernel</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Pass 1:</strong> Each work-item counts ones in one M-bit block (fully data-parallel, no communication).</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Pass 2:</strong> Each work-item computes (πᵢ − 0.5)² for its block; <code>sycl::reduction</code> accumulates the sum in double precision.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Pass 2 declares an explicit event dependency on Pass 1 — no host-side blocking needed between passes.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Host scales result: χ² = 4M·Σ(πᵢ−0.5)², P-value = <code>igamc(N/2, χ²/2)</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem;">
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <h3>Work-group size: 256</h3>
+        <p>Power-of-two required for binary tree reduction; avoids warp divergence on most GPU architectures.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💾</div>
+        <h3>USM Device Memory</h3>
+        <p><code>sycl::malloc_device</code> with a single <code>memcpy</code> before both kernels — no redundant host↔device transfers.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔢</div>
+        <h3>Double-precision reduction</h3>
+        <p>Block frequency accumulates (πᵢ−0.5)² in <code>double</code> to prevent loss of significance at N=10⁶ blocks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- REFERENCES -->
+<section id="references">
+  <div class="section-label">References</div>
+  <h2>Key References</h2>
+  <ol style="color:var(--muted);font-size:.875rem;padding-left:1.25rem;display:flex;flex-direction:column;gap:.6rem;">
+    <li>Bassham L. et al. <em>NIST SP 800-22 Rev. 1a — A Statistical Test Suite for Random and Pseudorandom Number Generators</em>. NIST, 2010.</li>
+    <li>Suciu A. et al. Parallel implementation of the NIST statistical test suite. <em>IEEE ICCP</em>, 2010.</li>
+    <li>Osama M., Hussein A. Parallelization of PRNG statistical tests using CUDA. <em>IEEE ICCES</em>, 2015.</li>
+    <li>Sýs M., Říha Z. Faster Randomness Testing with the NIST Statistical Test Suite. <em>LNCS Springer</em>, 2014.</li>
+    <li>罗影 et al. 基于SIMD的单比特频数和块内频数检测快速实现. <em>通信技术</em>, 2025.</li>
+    <li>Reinders J. et al. <em>Data Parallel C++: Mastering DPC++ for Heterogeneous Systems</em>. Apress, 2021.</li>
+    <li>国家密码管理局. <em>GM/T 0005-2021 随机性检测规范</em>. 2021.</li>
+  </ol>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    Kansinee Khuttiya (王依薇) · Computer Science and Technology ·
+    Xihua University · Supervisor: Guanlin He (何冠霖)
+  </p>
+  <p style="margin-top:.5rem;">
+    <a href="https://github.com/evieffvy/nist-sycl" target="_blank">GitHub</a> ·
+    NIST SP 800-22 · Intel oneAPI · SYCL 2020
+  </p>
+</footer>
+
+<script>
+  const labels = ['1 MB', '10 MB', '100 MB', '1 GB'];
+  const serial = [15, 150, 1500, 15000];
+  const syclCpu = [8, 50, 400, 4000];
+  const syclGpu = [2, 5, 30, 250];
+  const speedup = [7.5, 30, 50, 60];
+  const throughput = { serial: 500, cpu: 1500, gpu_low: 4000, gpu_high: 32000 };
+
+  const baseOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#8b949e', boxWidth: 12, font: { size: 12 } } } },
+    scales: {
+      x: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(48,54,61,.6)' } },
+      y: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(48,54,61,.6)' } }
+    }
+  };
+
+  // Time chart (log scale)
+  new Chart(document.getElementById('timeChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'NIST STS Serial', data: serial, backgroundColor: 'rgba(247,129,102,.7)', borderColor: '#f78166', borderWidth: 1 },
+        { label: 'SYCL CPU', data: syclCpu, backgroundColor: 'rgba(88,166,255,.5)', borderColor: '#58a6ff', borderWidth: 1 },
+        { label: 'SYCL GPU', data: syclGpu, backgroundColor: 'rgba(63,185,80,.7)', borderColor: '#3fb950', borderWidth: 1 }
+      ]
+    },
+    options: {
+      ...baseOpts,
+      scales: {
+        x: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(48,54,61,.6)' } },
+        y: {
+          type: 'logarithmic',
+          ticks: { color: '#8b949e', callback: v => v >= 1000 ? (v/1000)+'s' : v+'ms' },
+          grid: { color: 'rgba(48,54,61,.6)' }
+        }
+      }
+    }
+  });
+
+  // Speedup chart
+  new Chart(document.getElementById('speedupChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'GPU Speedup vs Serial',
+        data: speedup,
+        borderColor: '#58a6ff',
+        backgroundColor: 'rgba(88,166,255,.1)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#58a6ff',
+        pointRadius: 5,
+        fill: true,
+        tension: 0.35
+      }]
+    },
+    options: {
+      ...baseOpts,
+      scales: {
+        x: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(48,54,61,.6)' } },
+        y: {
+          ticks: { color: '#8b949e', callback: v => v + '×' },
+          grid: { color: 'rgba(48,54,61,.6)' }
+        }
+      }
+    }
+  });
+
+  // CPU vs GPU
+  new Chart(document.getElementById('cpuGpuChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'SYCL CPU', data: syclCpu, backgroundColor: 'rgba(88,166,255,.5)', borderColor: '#58a6ff', borderWidth: 1 },
+        { label: 'SYCL GPU', data: syclGpu, backgroundColor: 'rgba(63,185,80,.7)', borderColor: '#3fb950', borderWidth: 1 }
+      ]
+    },
+    options: {
+      ...baseOpts,
+      scales: {
+        x: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(48,54,61,.6)' } },
+        y: {
+          type: 'logarithmic',
+          ticks: { color: '#8b949e', callback: v => v >= 1000 ? (v/1000)+'s' : v+'ms' },
+          grid: { color: 'rgba(48,54,61,.6)' }
+        }
+      }
+    }
+  });
+
+  // Throughput bar
+  new Chart(document.getElementById('throughputChart'), {
+    type: 'bar',
+    data: {
+      labels: ['NIST STS Serial', 'SYCL CPU', 'SYCL GPU (1 MB)', 'SYCL GPU (1 GB)'],
+      datasets: [{
+        label: 'Throughput (Mbit/s)',
+        data: [500, 1500, 4000, 32000],
+        backgroundColor: ['rgba(247,129,102,.7)','rgba(88,166,255,.5)','rgba(63,185,80,.5)','rgba(63,185,80,.9)'],
+        borderColor: ['#f78166','#58a6ff','#3fb950','#3fb950'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      ...baseOpts,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(48,54,61,.6)' } },
+        y: {
+          ticks: { color: '#8b949e', callback: v => v >= 1000 ? (v/1000)+' Gbit/s' : v+' Mbit/s' },
+          grid: { color: 'rgba(48,54,61,.6)' }
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>
