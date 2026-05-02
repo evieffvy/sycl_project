@@ -1,6 +1,8 @@
 # SYCL-based Parallel Frequency Tests for Randomness Assessment
 
-Parallel implementation of NIST SP 800-22 frequency randomness tests using SYCL/DPC++, targeting CPU and GPU via Intel oneAPI or AdaptiveCpp.
+Parallel implementation of NIST SP 800-22 frequency randomness tests using SYCL/DPC++, targeting CPU and GPU via Intel oneAPI or AdaptiveCpp. 
+
+https://evieffvy.github.io/sycl_project
 
 ## Tests Implemented
 
