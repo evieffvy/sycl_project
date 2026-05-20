@@ -11,6 +11,18 @@ https://evieffvy.github.io/sycl_project
 | Frequency (Monobit) | Section 2.1 | Checks proportion of 1s and 0s in the sequence |
 | Frequency within a Block | Section 2.2 | Checks proportion of 1s within fixed-size blocks |
 
+## Benchmark Results
+
+Measured on NVIDIA RTX 4080 SUPER (Intel DPC++ 2024.0, Ubuntu, `icpx -O3 -fsycl`, SYCL target `nvptx64-nvidia-cuda`) against the NIST STS 2.1.2 serial reference.
+
+| Metric | Monobit (§2.1) | Block Frequency (§2.2) |
+|--------|----------------|------------------------|
+| Peak GPU speedup @ 100 M bits | **1,288×** (1.06 ms vs 1,367 ms) | **2,194×** |
+| Peak sustained GPU throughput | 94.3 Gbit/s | **160.5 Gbit/s** |
+| P-value match vs NIST STS 2.1.2 | ≥ 6 decimal places | ≥ 6 decimal places |
+
+Speedup tracks Amdahl's law (parallel fraction *p* > 0.999); throughput scales near-linearly with input size, and Block Frequency overtakes Monobit above ~10 M bits as kernel launch overhead amortizes. See `figures/` for the full speedup and throughput curves.
+
 ## Requirements
 
 - **Compiler**: Intel DPC++ (`icpx`) or AdaptiveCpp (`acpp`)
