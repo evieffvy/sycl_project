@@ -167,7 +167,7 @@ int main()
     test_monobit_alternating(q);
     test_block_reference    (q);
     test_block_all_ones     (q);
-    test_large_timing       (q);
+    test_large_timing         (q);
 
     std::cout << "\n===================================\n"
               << " Results: " << g_pass << " passed, " << g_fail << " failed\n"

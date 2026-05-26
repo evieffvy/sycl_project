@@ -19,7 +19,7 @@
 #include <stdexcept>
 #include <string>
 
-// Implemented in frequency_monobit.cpp / frequency_block.cpp
+// Implemented in their respective .cpp files (§2.1 – §2.2)
 TestResult run_frequency_monobit(sycl::queue& q, const uint8_t* bits, uint64_t n);
 TestResult run_frequency_block  (sycl::queue& q, const uint8_t* bits, uint64_t n, int M);
 
@@ -204,7 +204,7 @@ int main(int argc, char** argv)
 
     int exit_code = 0;
     try {
-        report(run_frequency_monobit(q, d_bits, n),          opt);
+        report(run_frequency_monobit(q, d_bits, n),              opt);
         report(run_frequency_block  (q, d_bits, n, opt.block_M), opt);
     } catch (const std::exception& e) {
         std::cerr << "Test execution error: " << e.what() << "\n";

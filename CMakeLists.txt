@@ -22,7 +22,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #     amdgcn-amd-amdhsa     – AMD GPU
 set(SYCL_FLAGS
     -fsycl
-    -fsycl-targets=nvptx64-nvidia-cuda
+    -fsycl-targets=spir64,nvptx64-nvidia-cuda
 )
 
 # ── Common options for all targets ─────────────────────────────
