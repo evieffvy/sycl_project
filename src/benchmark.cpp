@@ -116,10 +116,10 @@ void print_comparison(const std::string& name,
               << "    " << std::setw(16) << cpu_ms
               << "    " << std::setw(15) << gpu_ms << "║\n";
     std::cout << "╠════════════════════════════════════════════════════════════════════════════════╣\n";
-    std::cout << "║  Speedup vs serial (CPU)  :   " << std::setw(48) << cpu_speedup << " x ║\n";
-    std::cout << "║  Speedup vs serial (GPU)  :   " << std::setw(48) << gpu_speedup << " x ║\n";
-    std::cout << "║  P-value match (CPU)      :   " << std::setw(50) << (cpu_match ? "match" : "not match") << " ║\n";
-    std::cout << "║  P-value match (GPU)      :   " << std::setw(50) << (gpu_match ? "match" : "not match") << " ║\n";
+    std::cout << "║  Speedup vs serial (CPU)  :   " << std::setw(46) << cpu_speedup << " x ║\n";
+    std::cout << "║  Speedup vs serial (GPU)  :   " << std::setw(46) << gpu_speedup << " x ║\n";
+    std::cout << "║  P-value match (CPU)      :   " << std::setw(48) << (cpu_match ? "match" : "not match") << " ║\n";
+    std::cout << "║  P-value match (GPU)      :   " << std::setw(48) << (gpu_match ? "match" : "not match") << " ║\n";
     std::cout << "╚════════════════════════════════════════════════════════════════════════════════╝\n";
 }
 
