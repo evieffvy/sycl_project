@@ -17,8 +17,8 @@ Measured on NVIDIA RTX 4080 SUPER (Intel DPC++ 2024.0, Ubuntu, `icpx -O3 -fsycl`
 
 | Metric | Monobit (§2.1) | Block Frequency (§2.2) |
 |--------|----------------|------------------------|
-| Peak GPU speedup @ 100 M bits | **1,288×** (1.06 ms vs 1,367 ms) | **2,194×** |
-| Peak sustained GPU throughput | 94.3 Gbit/s | **160.5 Gbit/s** |
+| Peak GPU speedup @ 100 M bits | **1,321×** (1.05 ms vs 1,390 ms) | **2,234×** |
+| Peak sustained GPU throughput | 95.0 Gbit/s | **160.7 Gbit/s** |
 | P-value match vs NIST STS 2.1.2 | ≥ 6 decimal places | ≥ 6 decimal places |
 
 Speedup tracks Amdahl's law (parallel fraction *p* > 0.999); throughput scales near-linearly with input size, and Block Frequency overtakes Monobit above ~10 M bits as kernel launch overhead amortizes. See `figures/` for the full speedup and throughput curves.
