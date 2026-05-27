@@ -213,18 +213,20 @@
 <div class="hero">
   <h1>SYCL-based Parallel Frequency Tests for Randomness Assessment</h1>
   <p class="hero-sub">
-    Accelerating NIST SP 800-22 statistical tests using Intel oneAPI and SYCL,
-    achieving up to <strong style="color:var(--accent)">2,234× speedup</strong>
-    and <strong style="color:var(--accent)">160.7 Gbit/s</strong> on a single GPU —
-    with bit-exact P-value match and one portable codebase for Intel, NVIDIA, and AMD hardware.
+    Accelerating NIST SP 800-22 statistical tests using Intel oneAPI and SYCL —
+    up to <strong style="color:var(--accent)">2,234× speedup</strong> on GPU
+    and <strong style="color:var(--accent)">357× speedup</strong> on a 24-core CPU,
+    from a single portable codebase. Bit-exact P-value match against the NIST STS 2.1.2 serial reference.
   </p>
   <div class="hero-chips">
     <span class="chip">SYCL / DPC++</span>
     <span class="chip">Intel oneAPI</span>
     <span class="chip">NIST SP 800-22</span>
     <span class="chip">GPU Acceleration</span>
+    <span class="chip">CPU Acceleration</span>
     <span class="chip">C++17</span>
     <span class="chip">RTX 4080 SUPER</span>
+    <span class="chip">i9-13900KF</span>
   </div>
   <div class="hero-cta">
     <a class="btn btn-primary" href="https://github.com/evieffvy/sycl_project" target="_blank">
@@ -252,20 +254,20 @@
 
   <div class="stats-strip">
     <div class="stat">
-      <div class="stat-value">1,321×</div>
-      <div class="stat-label">Monobit speedup @ 100 M bits</div>
+      <div class="stat-value">2,234×</div>
+      <div class="stat-label">Peak GPU speedup @ 100 M bits (Block Freq)</div>
     </div>
     <div class="stat">
-      <div class="stat-value">2,234×</div>
-      <div class="stat-label">Block Frequency speedup @ 100 M bits</div>
+      <div class="stat-value">357×</div>
+      <div class="stat-label">Peak CPU speedup @ 100 M bits (Block Freq)</div>
     </div>
     <div class="stat">
       <div class="stat-value">160.7 Gbit/s</div>
-      <div class="stat-label">Peak sustained throughput</div>
+      <div class="stat-label">Peak GPU throughput</div>
     </div>
     <div class="stat">
       <div class="stat-value">6-decimal</div>
-      <div class="stat-label">P-value match vs NIST STS 2.1.2</div>
+      <div class="stat-label">P-value match vs NIST STS 2.1.2 (CPU + GPU)</div>
     </div>
   </div>
 
