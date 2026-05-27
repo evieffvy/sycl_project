@@ -380,10 +380,17 @@
     <table>
       <thead>
         <tr>
-          <th>Test</th>
-          <th>Bits (n)</th>
-          <th>NIST STS Serial</th>
-          <th>SYCL GPU</th>
+          <th rowspan="2">Test</th>
+          <th rowspan="2">Bits (n)</th>
+          <th rowspan="2">NIST STS Serial</th>
+          <th colspan="3">SYCL CPU</th>
+          <th colspan="3">SYCL GPU</th>
+        </tr>
+        <tr>
+          <th>Time</th>
+          <th>Speedup</th>
+          <th>Throughput</th>
+          <th>Time</th>
           <th>Speedup</th>
           <th>Throughput</th>
         </tr>
@@ -393,6 +400,9 @@
           <td>Frequency (Monobit)</td>
           <td class="num">100 M</td>
           <td class="num">1,390.10 ms</td>
+          <td class="num">14.705 ms</td>
+          <td class="num" style="color:var(--accent2)">94.5×</td>
+          <td class="num">6.80 Gbit/s</td>
           <td class="num">1.052 ms</td>
           <td class="num" style="color:var(--accent2)">1,321.0×</td>
           <td class="num">95.0 Gbit/s</td>
@@ -401,12 +411,19 @@
           <td>Block Frequency (M=1024)</td>
           <td class="num">100 M</td>
           <td class="num">1,390.10 ms</td>
+          <td class="num">3.894 ms</td>
+          <td class="num" style="color:var(--accent2)">357.0×</td>
+          <td class="num">25.68 Gbit/s</td>
           <td class="num">0.622 ms</td>
           <td class="num" style="color:var(--accent2)">2,234.5×</td>
           <td class="num">160.7 Gbit/s</td>
         </tr>
       </tbody>
     </table>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:.75rem;">
+      SYCL CPU benchmarked on Intel Core i9-13900KF (24 cores), Intel OpenCL 3.0 runtime.
+      P-values match NIST STS reference exactly across CPU, GPU, and serial.
+    </p>
   </div>
 </section>
 
